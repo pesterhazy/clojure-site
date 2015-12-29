@@ -23,8 +23,8 @@ use the „thread-first“ macro:
 ---------------------------
 (defn transform* [a-map]
    (-> a-map
-       (update :age inc)
-       (assoc :color :red))
+      (assoc :color :red)
+      (update :age inc))
 ---------------------------
 
 _**->**_ takes an initial value, its first argument, and „threads“ it
@@ -39,8 +39,8 @@ the insertion pint with three commas:
 -------------------------------
 (defn transform* [a-map]
    (-> a-map
-       (update ,,, :age inc)
-       (assoc ,,, :color :red))
+      (assoc ,,, :color :red)
+      (update ,,, :age inc))
 -------------------------------
 
 This visual aid is valid Clojure syntax because commas are considered
