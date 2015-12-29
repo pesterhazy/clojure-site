@@ -129,3 +129,5 @@ as their first argument
 ** common idiom: `(some-> x f)` as DRY shorthand for `(when x (f x))`
 * `cond->` and `cond->>`
 * add links to clojuredocs.org
+* figure out how to produce a literal arrow (not a unicode one) in AsciiDoc (or is this just a GitHub problem?)
+* clean up language
