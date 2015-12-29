@@ -111,6 +111,14 @@ mark the place where the argument will be inserted. Unlike with _**->**_,
 forms threaded with _**->>**_ see the threaded value inserted at the end of
 their argument list.
 
+Both thread-first and thread-last are in common use for pipelines. Which one is
+appropriate depends on the signature of the transformation functions. Ultimately
+you'll need to consult the documentation, but there are a few rules of thumb:
+
+* By convention, core functions that operate on sequential collections expect
+the collection as their last arguments. Accordingly, pipelines containing _**map**_,
+_**filter**, _**reduce** or _**into**_ usually call for the _**->>**_ macro.
+
 [[todo]]
 Todo
 ~~~~
