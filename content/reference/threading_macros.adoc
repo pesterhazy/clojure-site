@@ -128,3 +128,4 @@ as their first argument
 ** mostly used in the context of Java inter-op to avoid NullPointerExceptions
 ** common idiom: `(some-> x f)` as DRY shorthand for `(when x (f x))`
 * `cond->` and `cond->>`
+* add links to clojuredocs.org
