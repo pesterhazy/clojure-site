@@ -1,0 +1,130 @@
+Clojure programs often contain nested function applications. Code can
+easily become harder to read as the level of nesting grows. Threading macros
+are intended to improve readability of complex code.
+
+[[the-thread-first-macro]]
+The "thread-first" macro
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Idiomatic Clojure code consists of pure functions that transform input
+data into a desired output format. Consider a function that transforms a
+map:
+
+------------------------------------------
+(defn transform [a-map]
+   (update (assoc a-map :color :red) inc))
+------------------------------------------
+
+The function takes a value and performs a series of transformations,
+where each step in the series takes the result of the previous step as
+its input. This is a common pattern. You can rewrite this function to
+use the „thread-first“ macro:
+
+---------------------------
+(defn transform* [a-map]
+   (-> a-map
+       (update :age inc)
+       (assoc :color :red))
+---------------------------
+
+_**->**_ takes an initial value, its first argument, and „threads“ it
+through one or more function calls or other forms. In the first form,
+the macro inserts, as the first argument of the form, the value; at each
+subsequent step, it inserts the result of the previous computation. What
+looks like a function call with two arguments, then, is in fact a call
+with three arguments, as the threaded value is inserted between the
+function name and the first argument. We can visualize this by marking
+the insertion pint with three commas:
+
+-------------------------------
+(defn transform* [a-map]
+   (-> a-map
+       (update ,,, :age inc)
+       (assoc ,,, :color :red))
+-------------------------------
+
+This visual aid is valid Clojure syntax because commas are considered
+whitespace by Clojure’s parser.
+
+Semantically _**transform**_ is equivalent to _**transform2**_: the macro expands
+at compile time into the original code. The value of the macro call is the result of the
+last computation, the call to `update`. But to a human programmer, the
+re-written function looks different. It reads more like an informal
+description of the algorithm: „Take a thing, increase its age, change
+its color to red“. Of course, as we’re talking about immutable values,
+the value is not actually mutated in place. Instead, the function
+returns a new value with updated attributes.
+
+A pipeline of nested function calls will have as many closing
+parentheses as there are steps in the pipeline, whereas the threading
+macro will end with only two. So the threading macro is one way to keep
+parentheses under control. Indeed, introducing _**->**_ is a common
+refactoring, and one sign that a threading macro might improve the code
+is that three or more closing parentheses pile up at the end of a
+function.
+
+[[insertion-point]]
+Adjusting the insertion point
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The _**->**_ macro follows a purely syntactic transformation rule: for each
+expression, insert the threaded value between the function name and the
+first argument. Note that the threading expressions are function calls
+of the form _**(f arg1 arg2 …)**_. As a shorthand, a bare symbol or keyword
+without parentheses, on the other hand, is interpreted as a simple
+invocation with a single argument. This allows for a succinct chain of
+unary functions:
+
+------------------------------------------------------
+(-> a-map :color name clojure.string/upper-case)
+
+;; equivalent to
+
+(-> a-map (:color) (name) (clojure.string/upper-case))
+------------------------------------------------------
+
+However, _**->**_ is not universally applicable, as we do not necessarily
+always want to insert the threaded argument in initial position.
+Consider a function that computes the sum of the squares of all even
+positive integers up to (excluding) 10:
+
+-------------------------------------------------------------
+(defn calculate []
+   (reduce + (map (fn [x] (* x x)) (filter odd? (range 10))))
+-------------------------------------------------------------
+
+Like _**transform**_, _**calculate**_ is a pipeline of transformations, but
+unlike the former the threaded value appears, in each function call, in
+the final position in the argument list. Instead of the single arrow,
+then, we need to use the double arrow:
+
+----------------------------------
+(defn calculate* []
+   (->> (range 10)
+        (filter odd? ,,,)
+        (map (fn [x] (* x x)) ,,,)
+        (reduce + ,,,)))
+----------------------------------
+
+Again, though this is not usually done, we’re using a triple comma to
+mark the place where the argument will be inserted. Unlike with _**->**_,
+forms threaded with _**->>**_ see the threaded value inserted at the end of
+their argument list.
+
+[[todo]]
+Todo
+~~~~
+
+* when to use thread-first or thread-last?
+* by convention, core functions transforming collections take the
+collection as their final argument
+* core functions operating on associative data structures take the map
+as their first argument
+* java method calls (dot notation expects object as first argument)
+* `as->`
+* `some->` and `some->>`
+* useful for functions that don’t deal with nil values
+* mostly used in the context of Java inter-op to avoid
+NullPointerExceptions
+* common idiom: `(some-> x f)` as DRY shorthand for `(when x (f x))`
+* `cond->`
