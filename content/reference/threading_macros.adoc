@@ -116,15 +116,15 @@ Todo
 ~~~~
 
 * when to use thread-first or thread-last?
-* by convention, core functions transforming collections take the
+** by convention, core functions transforming collections take the
 collection as their final argument
-* core functions operating on associative data structures take the map
+** core functions operating on associative data structures take the map
 as their first argument
-* java method calls (dot notation expects object as first argument)
+** java method calls (dot notation expects object as first argument)
 * `as->`
+** used when the insertion point varies
 * `some->` and `some->>`
-* useful for functions that don’t deal with nil values
-* mostly used in the context of Java inter-op to avoid
-NullPointerExceptions
-* common idiom: `(some-> x f)` as DRY shorthand for `(when x (f x))`
-* `cond->`
+** useful for functions that don’t deal with nil values
+** mostly used in the context of Java inter-op to avoid NullPointerExceptions
+** common idiom: `(some-> x f)` as DRY shorthand for `(when x (f x))`
+* `cond->` and `cond->>`
