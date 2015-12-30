@@ -160,7 +160,7 @@ Special threading macros
 Clojure core also comes with a number of specialized threading macros.  `+++some->+++`
 and its cognate `+++some->>+++` are often useful when intefacing with Java methods.
 `+++some->+++` works like `+++->+++` in that it
-threads a value through a number of exceptions. It's advantage is that it short-circuits
+threads a value through a number of exceptions. It differs from it in that it short-circuits
 the pipeline if the value becomes `nil` at any point in the chain. One common
 problem with arrow macros in the context of Java inter-op is that Java methods do
 not expect to be passed `nil` (or `null`). You can avoid `NullPointerExceptions` in these cases
