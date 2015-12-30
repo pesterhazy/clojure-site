@@ -137,6 +137,15 @@ use:
 +
 Note, however, that there are also more specialized macros  `..` and `doto` for Java inter-op.
 
+Finally, a pipeline may consist of a mixture of functions with varying insertion points. In these
+cases, you'll need to use the more flexible variant, `as->`. For example, a pipeline may mix
+map and sequence processing:
+
+----------------------------------
+(as-> m m)
+----------------------------------
+
+
 [[todo]]
 Todo
 ~~~~
