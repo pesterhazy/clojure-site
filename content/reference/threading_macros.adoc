@@ -153,6 +153,43 @@ in each of the subsequent forms under that name.
   (.substring v 1)) ;; => "oo"
 ----------------------------------
 
+[[insertion-point]]
+Special threading macros
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Clojure core also comes with a number of specialized threading macros.  `some->`
+and its cognate `some->>` are often useful when intefacing with Java methods.
+`some->` works like `->` in that it
+threads a value through a number of exceptions. It's advantage is that it short-circuits
+the pipeline if the value becomes `nil` at any point in the chain. One common
+problem with arrow macros in the context of Java inter-op is that Java methods do
+not expect to be passed `nil` (or `null`). You can avoid `NullPointerExceptions` in these cases
+by adding explict guards:
+
+----------------------------------
+(let [counter (:counter a-map)]
+  (when counter
+    (inc (Long/parseLong counter)))
+----------------------------------
+
+With `some->`, we can achieve the same effect more succinctly:
+
+----------------------------------
+(some-> a-map :counter Long/parseLong inc)
+----------------------------------
+
+If `a-map` does not have a key `:counter`, the `some->` expression will
+be nil. This behavior is so useful that it is common to use `some->` with
+a single form:
+
+----------------------------------
+(some-> (compute) Long/parseLong)
+
+;; equivalent to
+
+(when-let [a-str (compute)]
+  (Long/parseLong a-str))
+----------------------------------
 
 [[todo]]
 Todo
