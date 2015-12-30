@@ -1,6 +1,7 @@
 Clojure programs often contain nested function applications. Code can
-easily become harder to read as the level of nesting grows. Threading macros
-are intended to improve readability of complex code.
+easily become harder to read as the level of nesting grows. Threading macros,
+also known as arrow macros, are a family of language features intended to improve
+the readability of nested function calls.
 
 [[the-thread-first-macro]]
 The "thread-first" macro
@@ -116,19 +117,30 @@ appropriate depends on the signature of the transformation functions. Ultimately
 you'll need to consult the documentation, but there are a few rules of thumb:
 
 * By convention, core functions that operate on sequential collections expect
-the collection as their last arguments. Accordingly, pipelines containing _**map**_,
-_**filter**, _**reduce** or _**into**_ usually call for the _**->>**_ macro.
+the collection as their last argument. Accordingly, pipelines containing `map`,
+`filter`, `remove`, `reduce` or `into` usually call for the `->>` macro.
+
+* Core functions that operate on associative data structures, on the other hand,
+expect the value they work with as their first argument. These include `assoc`,
+`update`, `dissoc`, `get` and their `-in` variants. Pipelines that modify
+maps usually call for the `->` macro.
+
+* When calling methods through Java inter-op, the Java object is passed as the first argument.
+In these cases, `->` is useful. For example, to check a string for a prefix, you could
+use:
+
++
+----------------------------------
+(-> string-to-check clojure.string/lower-case (.startsWith "prefix"))
+----------------------------------
+
++
+Note, however, that there are also more specialized macros  `..` and `doto` for Java inter-op.
 
 [[todo]]
 Todo
 ~~~~
 
-* when to use thread-first or thread-last?
-** by convention, core functions transforming collections take the
-collection as their final argument
-** core functions operating on associative data structures take the map
-as their first argument
-** java method calls (dot notation expects object as first argument)
 * `as->`
 ** used when the insertion point varies
 * `some->` and `some->>`
