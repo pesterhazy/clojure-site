@@ -29,7 +29,8 @@ use the „thread-first“ macro:
 ---------------------------
 
 _**->**_ takes an initial value, its first argument, and „threads“ it
-through one or more function calls or other forms. In the first form,
+through one or more function calls or other forms. (Threading in this
+context has nothing to do concurrency). In the first form,
 the macro inserts, as the first argument of the form, the value; at each
 subsequent step, it inserts the result of the previous computation. What
 looks like a function call with two arguments, then, is in fact a call
@@ -47,7 +48,7 @@ the insertion pint with three commas:
 This visual aid is valid Clojure syntax because commas are considered
 whitespace by Clojure’s parser.
 
-Semantically _**transform**_ is equivalent to _**transform2**_: the macro expands
+Semantically `transform` is equivalent to `transform*`: the macro expands
 at compile time into the original code. The value of the macro call is the result of the
 last computation, the call to `update`. But to a human programmer, the
 re-written function looks different. It reads more like an informal
@@ -68,11 +69,11 @@ function.
 Adjusting the insertion point
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The _**->**_ macro follows a purely syntactic transformation rule: for each
+The `->` macro follows a purely syntactic transformation rule: for each
 expression, insert the threaded value between the function name and the
 first argument. Note that the threading expressions are function calls
-of the form _**(f arg1 arg2 …)**_. As a shorthand, a bare symbol or keyword
-without parentheses, on the other hand, is interpreted as a simple
+of the form `(f arg1 arg2 …)`. As a shorthand, a bare symbol or keyword
+without parentheses is interpreted as a simple
 invocation with a single argument. This allows for a succinct chain of
 unary functions:
 
@@ -137,12 +138,19 @@ use:
 +
 Note, however, that there are also more specialized macros  `..` and `doto` for Java inter-op.
 
-Finally, a pipeline may consist of a mixture of functions with varying insertion points. In these
-cases, you'll need to use the more flexible variant, `as->`. For example, a pipeline may mix
-map and sequence processing:
+Finally, there are cases where neither `->` nor `->>` are applicable. A pipeline may consist
+of functions calls with varying insertion points. In these
+cases, you'll need to use the more flexible alternative, `as->`.
+`as->` expects two fixed arguments and a variable number of expressions. As with `->`,
+the first argument is a value to be threaded through the following forms.
+The second argument is the name of a binding. The threaded value will be available
+in each of the subsequent forms under that name.
 
 ----------------------------------
-(as-> m m)
+(as-> [:foo :bar] v
+  (map name v)
+  (first v)
+  (.substring v 1)) ;; => "oo"
 ----------------------------------
 
 
@@ -150,8 +158,6 @@ map and sequence processing:
 Todo
 ~~~~
 
-* `as->`
-** used when the insertion point varies
 * `some->` and `some->>`
 ** useful for functions that don’t deal with nil values
 ** mostly used in the context of Java inter-op to avoid NullPointerExceptions
