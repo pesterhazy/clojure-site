@@ -28,7 +28,7 @@ use the „thread-first“ macro:
       (update :age inc))
 ---------------------------
 
-_**->**_ takes an initial value, its first argument, and „threads“ it
+`+++->+++` takes an initial value, its first argument, and „threads“ it
 through one or more function calls or other forms. (Threading in this
 context has nothing to do concurrency). In the first form,
 the macro inserts, as the first argument of the form, the value; at each
@@ -60,7 +60,7 @@ returns a new value with updated attributes.
 A pipeline of nested function calls will have as many closing
 parentheses as there are steps in the pipeline, whereas the threading
 macro will end with only two. So the threading macro is one way to keep
-parentheses under control. Indeed, introducing _**->**_ is a common
+parentheses under control. Indeed, introducing `+++->+++` is a common
 refactoring, and one sign that a threading macro might improve the code
 is that three or more closing parentheses pile up at the end of a
 function.
@@ -69,7 +69,7 @@ function.
 Adjusting the insertion point
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The `->` macro follows a purely syntactic transformation rule: for each
+The `+++->+++` macro follows a purely syntactic transformation rule: for each
 expression, insert the threaded value between the function name and the
 first argument. Note that the threading expressions are function calls
 of the form `(f arg1 arg2 …)`. As a shorthand, a bare symbol or keyword
@@ -85,7 +85,7 @@ unary functions:
 (-> a-map (:color) (name) (clojure.string/upper-case))
 ------------------------------------------------------
 
-However, _**->**_ is not universally applicable, as we do not necessarily
+However, `+++->+++` is not universally applicable, as we do not necessarily
 always want to insert the threaded argument in initial position.
 Consider a function that computes the sum of the squares of all even
 positive integers up to (excluding) 10:
@@ -95,7 +95,7 @@ positive integers up to (excluding) 10:
    (reduce + (map (fn [x] (* x x)) (filter odd? (range 10))))
 -------------------------------------------------------------
 
-Like _**transform**_, _**calculate**_ is a pipeline of transformations, but
+Like `transform`, `calculate` is a pipeline of transformations, but
 unlike the former the threaded value appears, in each function call, in
 the final position in the argument list. Instead of the single arrow,
 then, we need to use the double arrow:
@@ -109,8 +109,8 @@ then, we need to use the double arrow:
 ----------------------------------
 
 Again, though this is not usually done, we’re using a triple comma to
-mark the place where the argument will be inserted. Unlike with _**->**_,
-forms threaded with _**->>**_ see the threaded value inserted at the end of
+mark the place where the argument will be inserted. Unlike with `+++->+++`,
+forms threaded with `+++->>+++` see the threaded value inserted at the end of
 their argument list.
 
 Both thread-first and thread-last are in common use for pipelines. Which one is
@@ -119,15 +119,15 @@ you'll need to consult the documentation, but there are a few rules of thumb:
 
 * By convention, core functions that operate on sequential collections expect
 the collection as their last argument. Accordingly, pipelines containing `map`,
-`filter`, `remove`, `reduce` or `into` usually call for the `->>` macro.
+`filter`, `remove`, `reduce` or `into` usually call for the `+++->>+++` macro.
 
 * Core functions that operate on associative data structures, on the other hand,
 expect the value they work with as their first argument. These include `assoc`,
 `update`, `dissoc`, `get` and their `-in` variants. Pipelines that modify
-maps usually call for the `->` macro.
+maps usually call for the `+++->+++` macro.
 
 * When calling methods through Java inter-op, the Java object is passed as the first argument.
-In these cases, `->` is useful. For example, to check a string for a prefix, you could
+In these cases, `+++->+++` is useful. For example, to check a string for a prefix, you could
 use:
 
 +
@@ -138,10 +138,10 @@ use:
 +
 Note, however, that there are also more specialized macros  `..` and `doto` for Java inter-op.
 
-Finally, there are cases where neither `->` nor `->>` are applicable. A pipeline may consist
+Finally, there are cases where neither `+++->+++` nor `+++->>+++` are applicable. A pipeline may consist
 of functions calls with varying insertion points. In these
-cases, you'll need to use the more flexible alternative, `as->`.
-`as->` expects two fixed arguments and a variable number of expressions. As with `->`,
+cases, you'll need to use the more flexible alternative, `+++as->+++`.
+`+++as->+++` expects two fixed arguments and a variable number of expressions. As with `+++->+++`,
 the first argument is a value to be threaded through the following forms.
 The second argument is the name of a binding. The threaded value will be available
 in each of the subsequent forms under that name.
@@ -153,13 +153,13 @@ in each of the subsequent forms under that name.
   (.substring v 1)) ;; => "oo"
 ----------------------------------
 
-[[insertion-point]]
+[[special-macros]]
 Special threading macros
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Clojure core also comes with a number of specialized threading macros.  `some->`
-and its cognate `some->>` are often useful when intefacing with Java methods.
-`some->` works like `->` in that it
+Clojure core also comes with a number of specialized threading macros.  `+++some->+++`
+and its cognate `+++some->>+++` are often useful when intefacing with Java methods.
+`+++some->+++` works like `+++->+++` in that it
 threads a value through a number of exceptions. It's advantage is that it short-circuits
 the pipeline if the value becomes `nil` at any point in the chain. One common
 problem with arrow macros in the context of Java inter-op is that Java methods do
@@ -172,14 +172,14 @@ by adding explict guards:
     (inc (Long/parseLong counter)))
 ----------------------------------
 
-With `some->`, we can achieve the same effect more succinctly:
+Using `+++some->+++`, we can achieve the same effect more succinctly:
 
 ----------------------------------
 (some-> a-map :counter Long/parseLong inc)
 ----------------------------------
 
-If `a-map` does not have a key `:counter`, the `some->` expression will
-be nil. This behavior is so useful that it is common to use `some->` with
+If `a-map` does not have a key `:counter`, the `+++some->+++` expression will
+be nil. This behavior is so useful that it is common to use `+++some->+++` with
 a single form:
 
 ----------------------------------
@@ -195,11 +195,6 @@ a single form:
 Todo
 ~~~~
 
-* `some->` and `some->>`
-** useful for functions that don’t deal with nil values
-** mostly used in the context of Java inter-op to avoid NullPointerExceptions
-** common idiom: `(some-> x f)` as DRY shorthand for `(when x (f x))`
 * `cond->` and `cond->>`
 * add links to clojuredocs.org
-* figure out how to produce a literal arrow (not a unicode one) in AsciiDoc (or is this just a GitHub problem?)
 * clean up language
