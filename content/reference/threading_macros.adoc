@@ -179,8 +179,8 @@ Using `+++some->+++`, we can achieve the same effect more succinctly:
 ----------------------------------
 
 If `a-map` does not have a key `:counter`, the `+++some->+++` expression will
-be nil. This behavior is so useful that it is common to use `+++some->+++` with
-a single form:
+return `nil`, rather than raising an exception. This behavior is so useful that
+it is common to see `+++some->+++` used with a single form:
 
 ----------------------------------
 (some-> (compute) Long/parseLong)
@@ -191,10 +191,28 @@ a single form:
   (Long/parseLong a-str))
 ----------------------------------
 
+Like `+++->+++`, `+++cond->+++` takes an initial value, but unlike the former
+it requires an even number of extra arguments. This argument list is interpreted as
+a series of `test, expr` pairs. `cond->` threads a value through each expression, but
+only if the associated test is true.  For each pair, `test` is evaluated. If the result
+is truthy, the expression is evaluated with the previous value. Otherwise evaluation
+proceeds with the next `test, expr` pair. Note that unlike `cond` or `some->`, `cond->`
+does not short-circuit evaluation if a condition is `false` or `nil`.
+
+----------------------------------
+(defn describe-number [n]
+  (cond-> []
+    (odd? n) (conj "odd")
+    (even? n) (conj "even")
+    (zero? n) (conj "zero")
+    (pos? n) (conj "positive")))
+----------------------------------
+
+`cond->>` works the same but threads the argument as the last argument in each form.
+
 [[todo]]
 Todo
 ~~~~
 
-* `cond->` and `cond->>`
-* add links to clojuredocs.org
+* add links to clojure.org
 * clean up language
