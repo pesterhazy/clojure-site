@@ -1,7 +1,7 @@
-Clojure programs often contain nested function applications. Code can easily
-become harder to read as the level of nesting grows. Threading macros, also
-known as arrow macros, are a family of language features intended to improve the
-readability of nested function calls.
+Clojure programs often make use of deeply nested function application, but code
+can become harder to read as the level of nesting increases. Threading macros,
+also known as arrow macros, are a family of language features intended to
+improve the clarity of code containing nested function calls.
 
 [[the-thread-first-macro]]
 The "thread-first" macro
@@ -137,7 +137,7 @@ string for a prefix, you could use:
 ----------------------------------
 
 +
-Note, however, that there are also more specialized macros  `..` and `doto` for Java inter-op.
+Note also the more specialized inter-op macros  `..` and `doto`.
 
 Finally, there are cases where neither `+++->+++` nor `+++->>+++` are
 applicable. A pipeline may consist of functions calls with varying insertion
