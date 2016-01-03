@@ -157,9 +157,9 @@ name.
 
 [[specialized-threading-macros]]
 Specialized threading macros
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As one of `clojure.core`'s more specialized threading macros, `+++some->+++` and
+As one of Clojure's more specialized threading macros, `+++some->+++` and
 its cognate `+++some->>+++` are used most commonly when intefacing with Java
 methods. `+++some->+++` works like `+++->+++` in that it threads a value through
 a number of expressions. It differs from it in that it short-circuits the
@@ -180,9 +180,9 @@ methods do not expect to be passed `nil` (or `null`). You can avoid
 (some-> a-map :foo Long/parseLong inc)
 ----------------------------------
 
-If `a-map` does not have a key `:foo`, the `+++some->+++` expression will return
-`nil`, rather than raising an exception. In fact this behavior is so useful that
-it is common to see `+++some->+++` used without any threading:
+If `a-map` lacks the key `:foo`, the entire expression will evaluate as `nil`
+rather than raising an exception. In fact this behavior is so useful that it is
+common to see `+++some->+++` used without any threading:
 
 ----------------------------------
 (some-> (compute) Long/parseLong)
