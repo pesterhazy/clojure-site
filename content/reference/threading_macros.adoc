@@ -109,10 +109,10 @@ then, we need to use the double arrow:
         (reduce + ,,,)))
 ----------------------------------
 
-Again, though this is not usually done, we’re using a triple comma to
-mark the place where the argument will be inserted. Unlike with `+++->+++`,
-forms threaded with `+++->>+++` see the threaded value inserted at the end of
-their argument list.
+Again, though they are usually omitted in practice, we’re adding three commas to
+mark the place where the argument will be inserted. As you can see, in forms
+threaded with `+++->>+++` the threaded value is inserted at the end rather than
+at the beginning of the argument list.
 
 Both thread-first and thread-last are in common use for pipelines. Which one is
 appropriate depends on the signature of the transformation functions. Ultimately
@@ -124,28 +124,29 @@ the collection as their last argument. Accordingly, pipelines containing `map`,
 
 * Core functions that operate on associative data structures, on the other hand,
 expect the value they work with as their first argument. These include `assoc`,
-`update`, `dissoc`, `get` and their `-in` variants. Pipelines that modify
-maps usually call for the `+++->+++` macro.
+`update`, `dissoc`, `get` and their `-in` variants. Pipelines that modify maps
+usually call for the `+++->+++` macro.
 
-* When calling methods through Java inter-op, the Java object is passed as the first argument.
-In these cases, `+++->+++` is useful. For example, to check a string for a prefix, you could
-use:
+* When calling methods through Java inter-op, the Java object is passed as the
+first argument. In these cases, `+++->+++` is useful. For example, to check a
+string for a prefix, you could use:
 
 +
 ----------------------------------
-(-> string-to-check clojure.string/lower-case (.startsWith "prefix"))
+(-> a-string clojure.string/lower-case (.startsWith "prefix"))
 ----------------------------------
 
 +
 Note, however, that there are also more specialized macros  `..` and `doto` for Java inter-op.
 
-Finally, there are cases where neither `+++->+++` nor `+++->>+++` are applicable. A pipeline may consist
-of functions calls with varying insertion points. In these
-cases, you'll need to use the more flexible alternative, `+++as->+++`.
-`+++as->+++` expects two fixed arguments and a variable number of expressions. As with `+++->+++`,
-the first argument is a value to be threaded through the following forms.
-The second argument is the name of a binding. The threaded value will be available
-in each of the subsequent forms under that name.
+Finally, there are cases where neither `+++->+++` nor `+++->>+++` are
+applicable. A pipeline may consist of functions calls with varying insertion
+points. In these cases, you'll need to use the more flexible alternative,
+`+++as->+++`. `+++as->+++` expects two fixed arguments and a variable number of
+expressions. As with `+++->+++`, the first argument is a value to be threaded
+through the following forms. The second argument is the name of a binding. The
+threaded value will be available in each of the subsequent forms under that
+name.
 
 ----------------------------------
 (as-> [:foo :bar] v
@@ -154,18 +155,18 @@ in each of the subsequent forms under that name.
   (.substring v 1)) ;; => "oo"
 ----------------------------------
 
-[[special-macros]]
-Special threading macros
+[[specialized-threading-macros]]
+Specialized threading macros
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Clojure core also comes with a number of specialized threading macros.  `+++some->+++`
-and its cognate `+++some->>+++` are often useful when intefacing with Java methods.
-`+++some->+++` works like `+++->+++` in that it
-threads a value through a number of exceptions. It differs from it in that it short-circuits
-the pipeline if the value becomes `nil` at any point in the chain. One common
-problem with arrow macros in the context of Java inter-op is that Java methods do
-not expect to be passed `nil` (or `null`). You can avoid `NullPointerExceptions` in these cases
-by adding explict guards:
+As one of `clojure.core`'s more specialized threading macros, `+++some->+++` and
+its cognate `+++some->>+++` are used most commonly when intefacing with Java
+methods. `+++some->+++` works like `+++->+++` in that it threads a value through
+a number of expressions. It differs from it in that it short-circuits the
+pipeline if an expression evaluates as `nil` at any point in the chain. One
+common problem with arrow macros in the context of Java inter-op is that Java
+methods do not expect to be passed `nil` (or `null`). You can avoid
+`NullPointerExceptions` in these cases by adding explict guards:
 
 ----------------------------------
 (let [counter (:counter a-map)]
@@ -173,15 +174,15 @@ by adding explict guards:
     (inc (Long/parseLong counter)))
 ----------------------------------
 
-Using `+++some->+++`, we can achieve the same effect more succinctly:
+`+++some->+++` achieves the same effect more succinctly:
 
 ----------------------------------
-(some-> a-map :counter Long/parseLong inc)
+(some-> a-map :foo Long/parseLong inc)
 ----------------------------------
 
-If `a-map` does not have a key `:counter`, the `+++some->+++` expression will
-return `nil`, rather than raising an exception. In fact this behavior is so
-useful that it is common to see `+++some->+++` used with a single form:
+If `a-map` does not have a key `:foo`, the `+++some->+++` expression will return
+`nil`, rather than raising an exception. In fact this behavior is so useful that
+it is common to see `+++some->+++` used without any threading:
 
 ----------------------------------
 (some-> (compute) Long/parseLong)
@@ -192,13 +193,14 @@ useful that it is common to see `+++some->+++` used with a single form:
   (Long/parseLong a-str))
 ----------------------------------
 
-Like `+++->+++`, `+++cond->+++` takes an initial value, but unlike the former
-it requires an even number of extra arguments. This argument list is interpreted as
-a series of `test, expr` pairs. `cond->` threads a value through each expression, but
-only if the associated test is true.  For each pair, `test` is evaluated. If the result
-is truthy, the expression is evaluated with the previous value. Otherwise evaluation
-proceeds with the next `test, expr` pair. Note that unlike `cond` or `some->`, `cond->`
-does not short-circuit evaluation if a condition is `false` or `nil`.
+Like `+++->+++`, `+++cond->+++` takes an initial value, but unlike the former it
+requires an even number of extra arguments. This argument list is interpreted as
+a series of `test, expr` pairs. `cond->` threads a value through each
+expression. However any expression is skipped if the associated test fails. For
+each pair, `test` is evaluated. If the result is truthy, the expression is
+evaluated with the previous value; otherwise evaluation proceeds with the next
+`test, expr` pair. Note that unlike `some->` or `cond`, `cond->` never
+short-circuits evaluation, even if a test evaluates as `false` or `nil`:
 
 ----------------------------------
 (defn describe-number [n]
@@ -212,7 +214,8 @@ does not short-circuit evaluation if a condition is `false` or `nil`.
 (describe-number 5) ;; => ["odd" "positive"]
 ----------------------------------
 
-`+++cond->>+++` works the same but threads the argument as the last argument in each form.
+`+++cond->>+++` is similar but threads the argument as the last argument in each
+form.
 
 [[todo]]
 Todo
