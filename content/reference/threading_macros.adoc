@@ -1,25 +1,24 @@
-Clojure programs often contain nested function applications. Code can
-easily become harder to read as the level of nesting grows. Threading macros,
-also known as arrow macros, are a family of language features intended to improve
-the readability of nested function calls.
+Clojure programs often contain nested function applications. Code can easily
+become harder to read as the level of nesting grows. Threading macros, also
+known as arrow macros, are a family of language features intended to improve the
+readability of nested function calls.
 
 [[the-thread-first-macro]]
 The "thread-first" macro
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Idiomatic Clojure code consists of pure functions that transform input
-data into a desired output format. Consider a function that transforms a
-map:
+Idiomatic Clojure uses pure functions that transform input data into a desired
+output format. Consider a function that applies two transformation to a map:
 
 ------------------------------------------
 (defn transform [a-map]
-   (update (assoc a-map :color :red) inc))
+   (update (assoc a-map :color :red) :age inc))
 ------------------------------------------
 
-The function takes a value and performs a series of transformations,
-where each step in the series takes the result of the previous step as
-its input. This is a common pattern. You can rewrite this function to
-use the „thread-first“ macro:
+`tranform` is an instance of a common pattern: it takes a value and transforms
+it a number of times, with each step in the pipeline taking the result of the
+previous step as its input. It is often possible to improve code of this shape
+by rewriing it to use the thread-first macro:
 
 ---------------------------
 (defn transform* [a-map]
@@ -28,15 +27,17 @@ use the „thread-first“ macro:
       (update :age inc))
 ---------------------------
 
-`+++->+++` takes an initial value, its first argument, and „threads“ it
-through one or more function calls or other forms. (Threading in this
-context has nothing to do concurrency). In the first form,
-the macro inserts, as the first argument of the form, the value; at each
-subsequent step, it inserts the result of the previous computation. What
-looks like a function call with two arguments, then, is in fact a call
-with three arguments, as the threaded value is inserted between the
-function name and the first argument. We can visualize this by marking
-the insertion pint with three commas:
+`+++->+++` takes an initial value, its first argument, and "threads" it through
+one or more expressions. Note that "threading" in this context refers to passing
+a value through forms, which is unrelated to the concept of a thread as a
+concurrency primitive.
+
+Starting with the first form, the macro inserts the given value as its first
+argument. When this is repeated at each subsequent step, the result of the
+previous computation is inserted. What looks like a function call with two
+arguments is in fact a call with three arguments, as the threaded value is
+inserted just after the function name. It may be helpful to mark the insertion
+point with three commas:
 
 -------------------------------
 (defn transform* [a-map]
@@ -45,8 +46,8 @@ the insertion pint with three commas:
       (update ,,, :age inc))
 -------------------------------
 
-This visual aid is valid Clojure syntax because commas are considered
-whitespace by Clojure’s parser.
+Though not often seen in the wild, this visual aid is valid Clojure syntax,
+commas being considered whitespace by Clojure’s parser.
 
 Semantically `transform` is equivalent to `transform*`: the macro expands
 at compile time into the original code. The value of the macro call is the result of the
@@ -179,8 +180,8 @@ Using `+++some->+++`, we can achieve the same effect more succinctly:
 ----------------------------------
 
 If `a-map` does not have a key `:counter`, the `+++some->+++` expression will
-return `nil`, rather than raising an exception. This behavior is so useful that
-it is common to see `+++some->+++` used with a single form:
+return `nil`, rather than raising an exception. In fact this behavior is so
+useful that it is common to see `+++some->+++` used with a single form:
 
 ----------------------------------
 (some-> (compute) Long/parseLong)
@@ -206,9 +207,12 @@ does not short-circuit evaluation if a condition is `false` or `nil`.
     (even? n) (conj "even")
     (zero? n) (conj "zero")
     (pos? n) (conj "positive")))
+
+(describe-number 3) ;; => ["even" "positive"]
+(describe-number 5) ;; => ["odd" "positive"]
 ----------------------------------
 
-`cond->>` works the same but threads the argument as the last argument in each form.
+`+++cond->>+++` works the same but threads the argument as the last argument in each form.
 
 [[todo]]
 Todo
@@ -216,3 +220,4 @@ Todo
 
 * add links to clojure.org
 * clean up language
+* actually try out code examples
