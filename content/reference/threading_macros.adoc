@@ -28,10 +28,10 @@ by rewriting it to use the thread-first macro:
       (update :age inc))
 ---------------------------
 
-`+++->+++` takes an initial value, its first argument, and "threads" it through
-one or more expressions. Note that "threading" in this context refers to passing
-a value through forms, which is unrelated to the concept of a thread as a
-concurrency primitive.
+Taking an initial value as its first argument, `+++->+++` threads it through one
+or more expressions. Note that the concept of "threading" in this context, used
+to mean passing through a value repeatedly, is unrelated to the concept of a
+thread as a concurrency primitive.
 
 Starting with the first form, the macro inserts the given value as its first
 argument. When this is repeated at each subsequent step, the result of the
@@ -55,8 +55,8 @@ at compile time into the original code. In each case, the return value of the
 function is the result of the last computation, the call to `update`. But to a
 programmer, the re-written function looks different. It reads more like an
 informal description of the algorithm: "Take a map, increase its age, change its
-color to red, and return the result". Of course, as we’re talking about
-immutable values, value are never mutated in place. Instead, the function
+color to red, and return the result". Of course in the context of immutable
+values no actual update through mutation takes place. Instead, the function
 returns a new value with updated attributes.
 
 Whereas a pipeline of nested function calls ends with as many closing
@@ -89,7 +89,7 @@ unary functions:
 However, `+++->+++` is not universally applicable, as we do not necessarily
 always want to insert the threaded argument in initial position.
 Consider a function that computes the sum of the squares of all even
-positive integers up to (excluding) 10:
+positive integers below ten:
 
 -------------------------------------------------------------
 (defn calculate []
@@ -99,7 +99,7 @@ positive integers up to (excluding) 10:
 Like `transform`, `calculate` is a pipeline of transformations, but
 unlike the former the threaded value appears, in each function call, in
 the final position in the argument list. Instead of the single arrow,
-then, we need to use the double arrow:
+then, we need to use the thread-last macro, `+++->>+++`:
 
 ----------------------------------
 (defn calculate* []
@@ -109,14 +109,15 @@ then, we need to use the double arrow:
         (reduce + ,,,)))
 ----------------------------------
 
-Again, though they are usually omitted in practice, we’re adding three commas to
-mark the place where the argument will be inserted. As you can see, in forms
-threaded with `+++->>+++` the threaded value is inserted at the end rather than
-at the beginning of the argument list.
+Again, though usually omitted, three commas mark the place where the argument
+will be inserted. As you can see, in forms threaded using `+++->>+++` the
+threaded value is inserted at the end rather than the beginning of the argument
+list.
 
-Both thread-first and thread-last are in common use for pipelines. Which one is
+Thread-first and thread-last are used in different circumstances. Which one is
 appropriate depends on the signature of the transformation functions. Ultimately
-you'll need to consult the documentation, but there are a few rules of thumb:
+you'll need to consult the documentation of the functions used, but there are a
+few rules of thumb:
 
 * By convention, core functions that operate on sequential collections expect
 the collection as their last argument. Accordingly, pipelines containing `map`,
@@ -141,12 +142,12 @@ Note also the more specialized inter-op macros  `..` and `doto`.
 
 Finally, there are cases where neither `+++->+++` nor `+++->>+++` are
 applicable. A pipeline may consist of functions calls with varying insertion
-points. In these cases, you'll need to use the more flexible alternative,
-`+++as->+++`. `+++as->+++` expects two fixed arguments and a variable number of
+points. In these cases, you'll need to use `+++as->+++`, the more flexible
+alternative. `+++as->+++` expects two fixed arguments and a variable number of
 expressions. As with `+++->+++`, the first argument is a value to be threaded
-through the following forms. The second argument is the name of a binding. The
-threaded value will be available in each of the subsequent forms under that
-name.
+through the following forms. The second argument is the name of a binding. In
+each of the subsequent forms, the respective threaded value will be available
+under that name.
 
 ----------------------------------
 (as-> [:foo :bar] v
@@ -159,14 +160,14 @@ name.
 Specialized threading macros
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As one of Clojure's more specialized threading macros, `+++some->+++` and
-its cognate `+++some->>+++` are used most commonly when intefacing with Java
-methods. `+++some->+++` works like `+++->+++` in that it threads a value through
-a number of expressions. It differs from it in that it short-circuits the
-pipeline if an expression evaluates as `nil` at any point in the chain. One
-common problem with arrow macros in the context of Java inter-op is that Java
-methods do not expect to be passed `nil` (or `null`). You can avoid
-`NullPointerExceptions` in these cases by adding explict guards:
+Two of Clojure's more specialized threading macros, `+++some->+++` and its
+cognate `+++some->>+++`, are used most commonly when intefacing with Java
+methods. `+++some->+++` resembles `+++->+++` in that it threads a value through
+a number of expressions. However, it also short-circuits execution when an
+expression evaluates as `nil` at any point in the chain. One common problem with
+arrow macros in the context of Java inter-op is that Java methods do not expect
+to be passed `nil` (`null)`. One way to avoid a `NullPointerException` in these
+cases is to add an explict guard:
 
 ----------------------------------
 (let [counter (:counter a-map)]
@@ -180,9 +181,9 @@ methods do not expect to be passed `nil` (or `null`). You can avoid
 (some-> a-map :foo Long/parseLong inc)
 ----------------------------------
 
-If `a-map` lacks the key `:foo`, the entire expression will evaluate as `nil`
+If `a-map` lacks the key `:foo`, the entire expression will evaluate to `nil`
 rather than raising an exception. In fact this behavior is so useful that it is
-common to see `+++some->+++` used without any threading:
+common to see `+++some->+++` used when threading is not required:
 
 ----------------------------------
 (some-> (compute) Long/parseLong)
@@ -193,14 +194,15 @@ common to see `+++some->+++` used without any threading:
   (Long/parseLong a-str))
 ----------------------------------
 
-Like `+++->+++`, `+++cond->+++` takes an initial value, but unlike the former it
-requires an even number of extra arguments. This argument list is interpreted as
-a series of `test, expr` pairs. `cond->` threads a value through each
-expression. However any expression is skipped if the associated test fails. For
-each pair, `test` is evaluated. If the result is truthy, the expression is
-evaluated with the previous value; otherwise evaluation proceeds with the next
-`test, expr` pair. Note that unlike `some->` or `cond`, `cond->` never
-short-circuits evaluation, even if a test evaluates as `false` or `nil`:
+Like `+++->+++`, the macro `+++cond->+++` takes an initial value, but unlike the
+former it generally requires an even number of extra arguments because the
+argument list is interpreted as a series of `test, expr` pairs. `+++cond->+++``
+threads a value through the expressions but skips those whose associated tests
+fail. For each pair, `test` is evaluated. If the result is truthy, the
+expression is evaluated with the previous value inserted as its first argument;
+otherwise evaluation proceeds with the next `test, expr` pair. Note that, unlike
+its relatives `+++some->+++` or `cond`, `+++cond->+++` never short-circuits
+evaluation, even if a test evaluates to `false` or `nil`:
 
 ----------------------------------
 (defn describe-number [n]
@@ -214,13 +216,12 @@ short-circuits evaluation, even if a test evaluates as `false` or `nil`:
 (describe-number 5) ;; => ["odd" "positive"]
 ----------------------------------
 
-`+++cond->>+++` is similar but threads the argument as the last argument in each
-form.
+`+++cond->>+++` inserts the threaded value as the last argument of each form but
+works analogously otherwise.
 
 [[todo]]
 Todo
 ~~~~
 
-* add links to clojure.org
-* clean up language
 * actually try out code examples
+* add links to clojure.org
