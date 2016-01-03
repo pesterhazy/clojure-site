@@ -1,5 +1,5 @@
-Clojure programs often make use of deeply nested function application, but code
-can become harder to read as the level of nesting increases. Threading macros,
+Clojure programs often make use of deeply nested function application, but
+with growing levels of nesting, code can become harder to read. Threading macros,
 also known as arrow macros, are a family of language features intended to
 improve the clarity of code containing nested function calls.
 
