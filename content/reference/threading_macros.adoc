@@ -1,11 +1,14 @@
+Threading macros
+-----------------
+
 Clojure programs often make use of deeply nested function application, but
 with growing levels of nesting, code can become harder to read. Threading macros,
 also known as arrow macros, are a family of language features intended to
 improve the clarity of code containing nested function calls.
 
 [[the-thread-first-macro]]
-The "thread-first" macro
-~~~~~~~~~~~~~~~~~~~~~~~~
+The thread-first macro (`+++->+++`)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In idiomatic Clojure, pure functions transform immutable data structures into a
 desired output format. Consider a function that applies two transformations to a
@@ -66,9 +69,9 @@ number of parentheses under control. Indeed, introducing `+++->+++` is a common
 refactoring, and one sign that a threading macro might help is that three or
 more closing parentheses pile up at the end of a function.
 
-[[insertion-point]]
-Adjusting the insertion point
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[[thread-last]]
+`+++->>+++` and `+++as->+++`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The `+++->+++` macro follows a purely syntactic transformation rule: for each
 expression, insert the threaded value between the function name and the
@@ -156,9 +159,9 @@ under that name.
   (.substring v 1)) ;; => "oo"
 ----------------------------------
 
-[[specialized-threading-macros]]
-Specialized threading macros
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[[some-and-cond]]
+`+++some->+++`, `+++some->>+++` and `+++cond->+++`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Two of Clojure's more specialized threading macros, `+++some->+++` and its
 cognate `+++some->>+++`, are used most commonly when intefacing with Java
