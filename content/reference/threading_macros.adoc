@@ -7,8 +7,9 @@ improve the clarity of code containing nested function calls.
 The "thread-first" macro
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Idiomatic Clojure uses pure functions that transform input data into a desired
-output format. Consider a function that applies two transformation to a map:
+In idiomatic Clojure, pure functions transform immutable data structures into a
+desired output format. Consider a function that applies two transformations to a
+map:
 
 ------------------------------------------
 (defn transform [a-map]
@@ -17,8 +18,8 @@ output format. Consider a function that applies two transformation to a map:
 
 `tranform` is an instance of a common pattern: it takes a value and transforms
 it a number of times, with each step in the pipeline taking the result of the
-previous step as its input. It is often possible to improve code of this shape
-by rewriing it to use the thread-first macro:
+previous step as its input. It is often possible to improve code of this type
+by rewriting it to use the thread-first macro:
 
 ---------------------------
 (defn transform* [a-map]
@@ -49,22 +50,21 @@ point with three commas:
 Though not often seen in the wild, this visual aid is valid Clojure syntax,
 commas being considered whitespace by Clojure’s parser.
 
-Semantically `transform` is equivalent to `transform*`: the macro expands
-at compile time into the original code. The value of the macro call is the result of the
-last computation, the call to `update`. But to a human programmer, the
-re-written function looks different. It reads more like an informal
-description of the algorithm: „Take a thing, increase its age, change
-its color to red“. Of course, as we’re talking about immutable values,
-the value is not actually mutated in place. Instead, the function
+Semantically `transform*` is equivalent to `transform`: the arrow macro expands
+at compile time into the original code. In each case, the return value of the
+function is the result of the last computation, the call to `update`. But to a
+programmer, the re-written function looks different. It reads more like an
+informal description of the algorithm: "Take a map, increase its age, change its
+color to red, and return the result". Of course, as we’re talking about
+immutable values, value are never mutated in place. Instead, the function
 returns a new value with updated attributes.
 
-A pipeline of nested function calls will have as many closing
-parentheses as there are steps in the pipeline, whereas the threading
-macro will end with only two. So the threading macro is one way to keep
-parentheses under control. Indeed, introducing `+++->+++` is a common
-refactoring, and one sign that a threading macro might improve the code
-is that three or more closing parentheses pile up at the end of a
-function.
+Whereas a pipeline of nested function calls ends with as many closing
+parentheses as there are steps in the pipeline, a threading macro typically has
+only two closing parentheses. So the threading macro is one way to keep the
+number of parentheses under control. Indeed, introducing `+++->+++` is a common
+refactoring, and one sign that a threading macro might help is that three or
+more closing parentheses pile up at the end of a function.
 
 [[insertion-point]]
 Adjusting the insertion point
