@@ -19,8 +19,8 @@ map:
    (update (assoc a-map :color :red) :age inc))
 ------------------------------------------
 
-`tranform` is an instance of a common pattern: it takes a value and transforms
-it a number of times, with each step in the pipeline taking the result of the
+`transform` is an example of a common pattern: it takes a value and transforms
+it a number of times with each step in the pipeline taking the result of the
 previous step as its input. It is often possible to improve code of this type
 by rewriting it to use the thread-first macro:
 
@@ -59,15 +59,15 @@ function is the result of the last computation, the call to `update`. But to a
 programmer, the re-written function looks different. It reads more like an
 informal description of the algorithm: "Take a map, increase its age, change its
 color to red, and return the result". Of course in the context of immutable
-values no actual update through mutation takes place. Instead, the function
+values, no actual mutation takes place. Instead, the function simply
 returns a new value with updated attributes.
 
 Whereas a pipeline of nested function calls ends with as many closing
 parentheses as there are steps in the pipeline, a threading macro typically has
 only two closing parentheses. So the threading macro is one way to keep the
 number of parentheses under control. Indeed, introducing `+++->+++` is a common
-refactoring, and one sign that a threading macro might help is that three or
-more closing parentheses pile up at the end of a function.
+way of refactoring code, and three or more closing parentheses piling up at the
+end of a function often mean that threading macros might help.
 
 [[thread-last]]
 The thread-last macro (+++->>+++) and +++as->+++
@@ -90,7 +90,7 @@ unary functions:
 ------------------------------------------------------
 
 However, `+++->+++` is not universally applicable, as we do not necessarily
-always want to insert the threaded argument in initial position.
+always want to insert the threaded argument in the initial position.
 Consider a function that computes the sum of the squares of all even
 positive integers below ten:
 
@@ -100,7 +100,7 @@ positive integers below ten:
 -------------------------------------------------------------
 
 Like `transform`, `calculate` is a pipeline of transformations, but
-unlike the former the threaded value appears, in each function call, in
+unlike the former, the threaded value appears in each function call in
 the final position in the argument list. Instead of the single arrow,
 then, we need to use the thread-last macro, `+++->>+++`:
 
@@ -164,7 +164,7 @@ under that name.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Two of Clojure's more specialized threading macros, `+++some->+++` and its
-cognate `+++some->>+++`, are used most commonly when intefacing with Java
+cognate `+++some->>+++`, are used most commonly when interfacing with Java
 methods. `+++some->+++` resembles `+++->+++` in that it threads a value through
 a number of expressions. However, it also short-circuits execution when an
 expression evaluates as `nil` at any point in the chain. One common problem with
@@ -185,7 +185,7 @@ cases is to add an explict guard:
 ----------------------------------
 
 If `a-map` lacks the key `:foo`, the entire expression will evaluate to `nil`
-rather than raising an exception. In fact this behavior is so useful that it is
+rather than raising an exception. In fact, this behavior is so useful that it is
 common to see `+++some->+++` used when threading is not required:
 
 ----------------------------------
@@ -198,13 +198,13 @@ common to see `+++some->+++` used when threading is not required:
 ----------------------------------
 
 Like `+++->+++`, the macro `+++cond->+++` takes an initial value, but unlike the
-former it generally requires an even number of extra arguments because the
-argument list is interpreted as a series of `test, expr` pairs. `+++cond->+++``
-threads a value through the expressions but skips those whose associated tests
-fail. For each pair, `test` is evaluated. If the result is truthy, the
-expression is evaluated with the previous value inserted as its first argument;
-otherwise evaluation proceeds with the next `test, expr` pair. Note that, unlike
-its relatives `+++some->+++` or `cond`, `+++cond->+++` never short-circuits
+former, it generally requires an even number of additional arguments because it
+interprets its argument list as a series of `test, expr` pairs. `+++cond->+++`
+threads a value through the expressions but skips those with failing tests. For
+each pair, `test` is evaluated. If the result is truthy, the expression is
+evaluated with the threaded value inserted as its first argument; otherwise
+evaluation proceeds with the next `test, expr` pair. Note that unlike its
+relatives, `+++some->+++` or `cond`, `+++cond->+++` never short-circuits
 evaluation, even if a test evaluates to `false` or `nil`:
 
 ----------------------------------
