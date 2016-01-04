@@ -70,8 +70,8 @@ way of refactoring code, and three or more closing parentheses piling up at the
 end of a function often mean that threading macros might help.
 
 [[thread-last]]
-The thread-last macro (+++->>+++) and +++as->+++
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The thread-last (+++->>+++) and thread-as (+++as->+++) macros
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The `+++->+++` macro follows a purely syntactic transformation rule: for each
 expression, insert the threaded value between the function name and the
