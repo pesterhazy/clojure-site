@@ -17,6 +17,8 @@ map:
 ------------------------------------------
 (defn transform [a-map]
    (update (assoc a-map :color :red) :age inc))
+
+(transform {:age 8}) ;; => {:color :red, :age 9}
 ------------------------------------------
 
 `transform` is an example of a common pattern: it takes a value and transforms
@@ -28,7 +30,9 @@ by rewriting it to use the thread-first macro:
 (defn transform* [a-map]
    (-> a-map
       (assoc :color :red)
-      (update :age inc))
+      (update :age inc)))
+      
+(transform* {:age 8}) ;; => {:color :red, :age 9}
 ---------------------------
 
 Taking an initial value as its first argument, `+++->+++` threads it through one
@@ -47,7 +51,7 @@ point with three commas:
 (defn transform* [a-map]
    (-> a-map
       (assoc ,,, :color :red)
-      (update ,,, :age inc))
+      (update ,,, :age inc)))
 -------------------------------
 
 Though not often seen in the wild, this visual aid is valid Clojure syntax,
@@ -96,7 +100,7 @@ positive integers below ten:
 
 -------------------------------------------------------------
 (defn calculate []
-   (reduce + (map (fn [x] (* x x)) (filter odd? (range 10))))
+   (reduce + (map (fn [x] (* x x)) (filter odd? (range 10)))))
 -------------------------------------------------------------
 
 Like `transform`, `calculate` is a pipeline of transformations, but
@@ -175,16 +179,16 @@ cases is to add an explict guard:
 ----------------------------------
 (let [counter (:counter a-map)]
   (when counter
-    (inc (Long/parseLong counter)))
+    (inc (Long/parseLong counter))))
 ----------------------------------
 
 `+++some->+++` achieves the same effect more succinctly:
 
 ----------------------------------
-(some-> a-map :foo Long/parseLong inc)
+(some-> a-map :counter Long/parseLong inc)
 ----------------------------------
 
-If `a-map` lacks the key `:foo`, the entire expression will evaluate to `nil`
+If `a-map` lacks the key `:counter`, the entire expression will evaluate to `nil`
 rather than raising an exception. In fact, this behavior is so useful that it is
 common to see `+++some->+++` used when threading is not required:
 
@@ -215,7 +219,7 @@ evaluation, even if a test evaluates to `false` or `nil`:
     (zero? n) (conj "zero")
     (pos? n) (conj "positive")))
 
-(describe-number 3) ;; => ["even" "positive"]
+(describe-number 4) ;; => ["even" "positive"]
 (describe-number 5) ;; => ["odd" "positive"]
 ----------------------------------
 
